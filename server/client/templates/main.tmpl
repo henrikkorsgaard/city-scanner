@@ -1,0 +1,26 @@
+{{define "header"}}
+<!doctype html>
+  <head>
+	<meta charset="utf-8"/>
+    <title>City-scanner dashboard</title>
+    <link rel="stylesheet" type="text/css" href="./static/css/main.css">
+  </head>
+  <body>
+    <div id="wrapper">
+        {{end}}
+       
+        {{define "footer"}}
+    </div>
+
+    
+  </body>
+</html>
+{{end}}
+
+
+
+{{define "404"}}
+{{template "header"}}
+<h1>404</h1>
+{{template "footer"}}
+{{end}}

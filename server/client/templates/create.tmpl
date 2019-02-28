@@ -1,0 +1,21 @@
+{{define "create"}}
+{{template "header"}}
+<link rel="stylesheet" href="./static/css/create.css" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"   integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="   crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"   integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="   crossorigin=""></script>
+  <h2>Setup New Experiment</h2>
+  
+  <form>
+    <p>This will setup a new experiment locations. Once setup, a configuration file will be generated for the experiment and you can start collecting data.</p>
+    <p>Please provide a experiment name and contact email on primary researcher.</p>
+    <input type="text" placeholder="Experiment name">
+    <input type="text" placeholder="Contact email">
+    <h3>Location details</h3>
+    <p>Please provide information on location either by searching for a city, use the geolocaiton feature of the browser or select via the map below. We will estimate the location based on the centre of the map coordinates and use this information for generating the experiment setup.</p>
+    <input type="text" id="city" placeholder="city, country"><button id="search">Search</button><button id="geoloc">Use GeoLocation</button>
+    <div id="mapview"></div>
+    <button id="create">Setup Experiment</button><button id="cancel">Cancel</button>
+  </form>
+<script type="text/javascript" src="./static/js/create.js"></script>
+{{template "footer"}}
+{{end}}
