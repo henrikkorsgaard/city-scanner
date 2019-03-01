@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -54,23 +57,45 @@ func overview(w http.ResponseWriter, r *http.Request) {
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
 
-	files = append(files, filepath.Join("./client/templates", "create.tmpl"))
+		jsn, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Fatal("Error reading the body", err)
+		}
 
-	tmpl, err := template.ParseFiles(files...)
+		if b, err := ioutil.ReadAll(r.Body); err == nil {
+			fmt.Println(string(b))
+		}
 
-	if err != nil {
-		// Log the detailed error
-		log.Println(err.Error())
-		// Return a generic "Internal Server Error" message
-		http.Error(w, http.StatusText(500), 500)
-		return
+		experiment := experiment.Experiment{}
+
+		err = json.Unmarshal(jsn, &experiment)
+		if err != nil {
+			log.Fatal("Decoding error: ", err)
+		}
+
+		log.Printf("Received: %v\n", experiment)
+
+	} else {
+		files = append(files, filepath.Join("./client/templates", "create.tmpl"))
+
+		tmpl, err := template.ParseFiles(files...)
+
+		if err != nil {
+			// Log the detailed error
+			log.Println(err.Error())
+			// Return a generic "Internal Server Error" message
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
+
+		if err := tmpl.ExecuteTemplate(w, "create", nil); err != nil {
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(500), 500)
+		}
 	}
 
-	if err := tmpl.ExecuteTemplate(w, "create", nil); err != nil {
-		log.Println(err.Error())
-		http.Error(w, http.StatusText(500), 500)
-	}
 }
 
 func experiment(w http.ResponseWriter, r *http.Request) {

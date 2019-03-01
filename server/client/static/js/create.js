@@ -6,9 +6,60 @@ function bootstrap(){
 	var create = document.querySelector("button#create")
 	var cancel = document.querySelector("button#cancel")
 
+	var name = document.querySelector("input#name")
+	var email = document.querySelector("input#email")
+
+	var emailRegEx = new RegExp("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+
 	var coords = {
-		lat: 0,
-		lng: 0,
+		lat: 4,
+		lng: 4,
+		zoom: 12
+	}
+
+	var validation = {
+		email:false,
+		name:false,
+		coordinates:false
+	}
+
+	validate();
+
+	email.addEventListener('blur', validateEmail)
+	name.addEventListener('blur', validateName)
+
+	function validateEmail(){
+		if(emailRegEx.test(email.value)){
+			validation.email = true;
+			name.classList.remove("error")
+		} else {
+			name.classList.add("error")
+			validation.email = false;
+		}
+		validate()
+	}
+
+	validateEmail()
+
+	function validateName(){
+		if(name.value.trim() !== ""){
+			name.classList.remove("error")
+			validation.name = true
+		} else {	
+			name.classList.add("error")
+			validation.name = true
+		}
+		validate()
+	}
+
+	validateName()
+
+	function validate(){
+		if(validation.name && validation.email && validation.coordinates){
+			create.disabled = false;
+		} else {
+			create.disabled = true;
+		}
 	}
 	
 	if (!navigator.geolocation){
@@ -22,15 +73,22 @@ function bootstrap(){
 				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 		});
 	map.addLayer(tiles)
+	
 
 	map.addEventListener("moveend", function(e){
 		coords.lat = map.getCenter().lat
-		coords.lng = map.getCenter().lng		
+		coords.lng = map.getCenter().lng
+		coords.zoom = map.getZoom()	
+		validation.coordinates = true;
+		validate();
 	})
 
 	map.addEventListener("zoomend", function(e){
 		coords.lat = map.getCenter().lat
-		coords.lng = map.getCenter().lng	
+		coords.lng = map.getCenter().lng
+		coords.zoom = map.getZoom()
+		validation.coordinates = true;
+		validate();
 	})
 
 	cancel.addEventListener('click', function(e){
@@ -39,25 +97,29 @@ function bootstrap(){
 	});
 
 	geoloc.addEventListener('click', function(e){
+		document.querySelector(".lds-ellipsis").classList.add("active")
 		e.preventDefault()
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(function(pos){
 				
 				coords.lat = pos.coords.latitude
 				coords.lng = pos.coords.longitude
+				coords.zoom = 12
 				map.setView([pos.coords.latitude, pos.coords.longitude], 12)
-				
+				document.querySelector(".lds-ellipsis").classList.remove("active")
+				validation.coordinates = true;
+				validate();
 			});
 		}
 	});
 
 	search.addEventListener('click', function(e){
+		document.querySelector(".lds-ellipsis").classList.add("active")
 		e.preventDefault()
 		var data = document.querySelector("#city")
 		if(data.value.trim() !== ""){
 			apiRequest(data.value, function(data){
 				if(data && data.results.length > 0){
-					
 					var results = data.results
 					var found = results[0]
 					for(var i = 0, n = results.length; i < n; i++){
@@ -69,7 +131,12 @@ function bootstrap(){
 					}
 					coords.lat = found.geometry.lat
 					coords.lng = found.geometry.lng
+					coords.zoom = 12
 					map.setView([found.geometry.lat, found.geometry.lng], 12)
+					document.querySelector(".lds-ellipsis").classList.remove("active")
+					validation.coordinates = true;
+					
+					validate();
 
 				} else {
 					console.log("error")
@@ -79,13 +146,28 @@ function bootstrap(){
 		console.log(data.value)
 	});
 
-	create.addEventListener('click', function(e){
-		e.preventDefault()
-		//validate
-		//post data to server
-		//redirect to experiment template with generated files for nodes.
 
+
+	create.addEventListener('click', function(e){
+		e.preventDefault();
+		console.log(coords.lat)
+		postData({email: email.value, name: name.value, lat: coords.lat, lng: coords.lng, zoom: coords.zoom})
 	})
+}
+
+function postData(data){
+	var xhr = new XMLHttpRequest();
+	
+	xhr.open('POST', './create');
+	/*
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState === 4 && xhr.status === 200) {
+			console.log("post success")
+			
+		}
+	}*/
+	console.log(JSON.stringify(data))
+	xhr.send(JSON.stringify(data));
 }
 
 function apiRequest(location, callback){
