@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -12,6 +11,7 @@ import (
 	"text/template"
 
 	"github.com/gorilla/mux"
+	"github.com/henrikkorsgaard/city-scanner/server/experiment"
 )
 
 var (
@@ -21,6 +21,7 @@ var (
 )
 
 func main() {
+
 	var dir string
 	flag.StringVar(&dir, "dir", "./client/static/", "the directory to serve files from. Defaults to the current dir")
 	flag.Parse()
@@ -31,10 +32,11 @@ func main() {
 
 	r.HandleFunc("/", overview).Methods("GET")
 	r.HandleFunc("/create", create).Methods("GET", "POST")
-	r.HandleFunc("/experiment/{experiment}", experiment).Methods("GET")
+	r.HandleFunc("/experiment/{experiment}", experimentHandler).Methods("GET")
 	r.HandleFunc("/api", api).Methods("GET", "POST")
 
 	log.Fatal(http.ListenAndServe(":2488", r))
+
 }
 
 func overview(w http.ResponseWriter, r *http.Request) {
@@ -59,23 +61,16 @@ func overview(w http.ResponseWriter, r *http.Request) {
 func create(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 
-		jsn, err := ioutil.ReadAll(r.Body)
+		jsonData, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Fatal("Error reading the body", err)
 		}
 
-		if b, err := ioutil.ReadAll(r.Body); err == nil {
-			fmt.Println(string(b))
-		}
-
-		experiment := experiment.Experiment{}
-
-		err = json.Unmarshal(jsn, &experiment)
+		experiment, err := experiment.NewExperiment(jsonData)
 		if err != nil {
-			log.Fatal("Decoding error: ", err)
+			log.Fatal(err)
 		}
-
-		log.Printf("Received: %v\n", experiment)
+		fmt.Println(experiment)
 
 	} else {
 		files = append(files, filepath.Join("./client/templates", "create.tmpl"))
@@ -98,7 +93,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func experiment(w http.ResponseWriter, r *http.Request) {
+func experimentHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Gorilla!\n"))
 }
 
