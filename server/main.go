@@ -30,16 +30,16 @@ func main() {
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 
-	r.HandleFunc("/", overview).Methods("GET")
-	r.HandleFunc("/create", create).Methods("GET", "POST")
+	r.HandleFunc("/", overviewHandler).Methods("GET")
+	r.HandleFunc("/create", createHandler).Methods("GET", "POST")
 	r.HandleFunc("/experiment/{experiment}", experimentHandler).Methods("GET")
-	r.HandleFunc("/api", api).Methods("GET", "POST")
+	r.HandleFunc("/api/", apiHandler).Methods("GET", "POST")
 
 	log.Fatal(http.ListenAndServe(":2488", r))
 
 }
 
-func overview(w http.ResponseWriter, r *http.Request) {
+func overviewHandler(w http.ResponseWriter, r *http.Request) {
 
 	files = append(files, filepath.Join("./client/templates", "overview.tmpl"))
 	tmpl, err := template.ParseFiles(files...)
@@ -58,7 +58,7 @@ func overview(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func create(w http.ResponseWriter, r *http.Request) {
+func createHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 
 		jsonData, err := ioutil.ReadAll(r.Body)
@@ -94,10 +94,20 @@ func create(w http.ResponseWriter, r *http.Request) {
 }
 
 func experimentHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Gorilla!\n"))
+	vars := mux.Vars(r)
+	name := vars["experiment"]
+	e, err := experiment.GetExperiment(name)
+	fmt.Println(e)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("404\n"))
+	} else {
+		w.Write([]byte("good\n"))
+	}
+
 }
 
-func api(w http.ResponseWriter, r *http.Request) {
+func apiHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Gorilla!\n"))
 }
 
