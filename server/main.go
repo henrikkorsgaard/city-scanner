@@ -32,6 +32,7 @@ func main() {
 
 	r.HandleFunc("/", overviewHandler).Methods("GET")
 	r.HandleFunc("/create", createHandler).Methods("GET", "POST")
+	r.HandleFunc("/validate/{key}/{value}", validateHandler).Methods("GET")
 	r.HandleFunc("/experiment/{experiment}", experimentHandler).Methods("GET")
 	r.HandleFunc("/api/", apiHandler).Methods("GET", "POST")
 
@@ -66,10 +67,12 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal("Error reading the body", err)
 		}
 
-		experiment, err := experiment.NewExperiment(jsonData)
+		experiment, exists, err := experiment.NewExperiment(jsonData)
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println(exists)
+		//exists should be handled in valudation
 		fmt.Println(experiment)
 
 	} else {
@@ -90,13 +93,39 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(500), 500)
 		}
 	}
+}
 
+func validateHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	switch key := vars["key"]; key {
+	case "name":
+		value := vars["value"]
+		for _, expName := range experiment.AllExperimentNames {
+			if expName == value {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte("Exists\n"))
+				return
+			}
+		}
+
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("404\n"))
+
+		return
+	default:
+		fmt.Println("Recieved unknown validation key!")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("404\n"))
+
+		return
+	}
 }
 
 func experimentHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	name := vars["experiment"]
-	e, err := experiment.GetExperiment(name)
+	slug := vars["experiment"]
+	e, err := experiment.GetExperiment(slug)
 	fmt.Println(e)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)

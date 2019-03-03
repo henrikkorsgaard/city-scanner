@@ -53,12 +53,15 @@ type Reading struct {
 }
 
 var (
-	experimentDB     *sql.DB
-	DBDir            string
-	DBExperimentsDir string
+	experimentDB       *sql.DB
+	DBDir              string
+	DBExperimentsDir   string
+	AllExperimentNames = []string{}
 )
 
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+const (
+	letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+)
 
 func init() {
 	var err error
@@ -80,24 +83,26 @@ func init() {
 		log.Fatal(err)
 	}
 	statement.Exec()
+
+	AllExperimentNames = getAllExperimentNames()
 }
 
-func NewExperiment(jsonData []byte) (e Experiment, err error) {
+func NewExperiment(jsonData []byte) (e Experiment, exists bool, err error) {
 
 	e = Experiment{}
 	err = json.Unmarshal(jsonData, &e)
 	if err != nil {
 		return
 	}
-	fmt.Println(e.Name)
+
 	//If the database already exists it should return here
 	if exist := experimentExists(e.Name); exist {
-		fmt.Print("already exist!")
-		err = fmt.Errorf("Record already exist")
+		exists = true
 		return
 	}
 
 	e.Slug = strings.Replace(e.Name, " ", "-", -1)
+	e.Active = true
 	//https://medium.com/@raul_11817/golang-cryptography-rsa-asymmetric-algorithm-e91363a2f7b3
 	privkey, err := rsa.GenerateKey(rand.Reader, 1024)
 	//https://stackoverflow.com/questions/13555085/save-and-load-crypto-rsa-privatekey-to-and-from-the-disk
@@ -121,16 +126,14 @@ func NewExperiment(jsonData []byte) (e Experiment, err error) {
 		fmt.Println(err)
 		return
 	}
-	var result sql.Result
-	result, err = statement.Exec(e.Slug, e.Name, e.Email, e.Latitude, e.Longitude, e.PrivateKey, e.NodeSalt, e.DatabaseFileName)
+
+	_, err = statement.Exec(e.Slug, e.Name, e.Email, e.Latitude, e.Longitude, e.PrivateKey, e.NodeSalt, e.DatabaseFileName)
 
 	if err != nil {
 		fmt.Println("ældjas")
 		fmt.Println(err)
 		return
 	}
-
-	fmt.Println(result)
 
 	var db *sql.DB
 	db, err = sql.Open("sqlite3", filepath.Join(DBExperimentsDir, e.DatabaseFileName))
@@ -160,9 +163,8 @@ func NewExperiment(jsonData []byte) (e Experiment, err error) {
 		return
 	}
 	statement.Exec()
+	AllExperimentNames = getAllExperimentNames()
 
-	//we also need to generate a config file and a private keys
-	log.Printf("file: %v\n", e)
 	return
 }
 
@@ -174,6 +176,27 @@ func GetExperiment(name string) (e Experiment, err error) {
 	row := experimentDB.QueryRow(statement, name)
 	err = row.Scan(&e.Name, &e.Slug, &e.Email, &e.Latitude, &e.Longitude)
 	return
+}
+
+func getAllExperimentNames() []string {
+	names := []string{}
+	statement := `SELECT name FROM experiments;`
+	var name string
+	rows, err := experimentDB.Query(statement)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&name)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		names = append(names, name)
+	}
+
+	return names
 }
 
 func experimentExists(name string) bool {

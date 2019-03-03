@@ -11,14 +11,24 @@ html, body {
 }
 
 #form input[type="text"] {
-	padding:5px;
+  padding:5px;
 	font-size:1.2em;
-	margin:5px;
+  margin:5px;
+  margin-bottom:0px;
 	width: 300px;
 }
 
+#form p.email-err, #form p.name-err  {
+  display:inline-block;
+  width: 300px;
+  margin:0px 10px;
+  padding:0px 3px;
+  color:red;
+  font-size:70%;
+}
+
 #form input[type="text"].error {
-	border:2px solid red;
+  border:2px solid red;
 }
 
 #form button {

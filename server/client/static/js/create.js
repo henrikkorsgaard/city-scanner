@@ -5,6 +5,8 @@ function bootstrap(){
 	var geoloc = document.querySelector("button#geoloc")
 	var create = document.querySelector("button#create")
 	var cancel = document.querySelector("button#cancel")
+	var name_err = document.querySelector("p.name-err")
+	var email_err = document.querySelector("p.email-err")
 
 	var name = document.querySelector("input#name")
 	var email = document.querySelector("input#email")
@@ -31,9 +33,12 @@ function bootstrap(){
 	function validateEmail(){
 		if(emailRegEx.test(email.value)){
 			validation.email = true;
-			name.classList.remove("error")
+			email.classList.remove("error")
+			email_err.style.visibility = "hidden"
 		} else {
-			name.classList.add("error")
+			email_err.style.visibility = "visible"
+			email_err.innerHTML = "Must provide email"
+			email.classList.add("error")
 			validation.email = false;
 		}
 		validate()
@@ -43,18 +48,34 @@ function bootstrap(){
 
 	function validateName(){
 		if(name.value.trim() !== ""){
-			name.classList.remove("error")
-			validation.name = true
-		} else {	
+			isNameUnique(name.value, function(result){
+				if(result){
+					name.classList.remove("error")
+					validation.name = true;
+					name_err.style.visibility = "hidden"
+				} else {
+					name_err.style.visibility = "visible"
+					name_err.innerHTML = "Name already taken"
+					name.classList.add("error")
+					validation.name = false;
+				}
+				validate()
+			})
+		
+		} else {
+			name_err.style.visibility = "visible"
 			name.classList.add("error")
-			validation.name = true
+			name_err.innerHTML = "Must provide name"
+			validation.name = false;
+			validate()
 		}
-		validate()
+		
 	}
 
 	validateName()
 
 	function validate(){
+		console.log(validation)
 		if(validation.name && validation.email && validation.coordinates){
 			create.disabled = false;
 		} else {
@@ -182,6 +203,20 @@ function apiRequest(location, callback){
 			} catch(e){
 				callback()
 			}
+		}
+	}
+	xhr.send(null);
+}
+
+function isNameUnique(name, callback){
+	var xhr = new XMLHttpRequest();
+	//This need to happen serverside bro
+	xhr.open('GET', './validate/name/'+name);
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState === 4 && xhr.status === 200) {
+			callback(false)
+		} else if (xhr.readyState === 4 && xhr.status === 404){
+			callback(true)
 		}
 	}
 	xhr.send(null);
