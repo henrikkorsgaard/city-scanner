@@ -1,0 +1,32 @@
+{{define "experiment"}}
+{{template "header"}}
+<link rel="stylesheet" type="text/css" href="/static/css/experiment.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+  crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+  crossorigin=""></script>
+<button id="back">&larr;</button>
+<h1 id="name">Experiment: {{.Name}}</h1>
+<div id="email">Primary contact: {{.Email}}</div>
+<div id="mapview"></div>
+<button id="download">Download configuration file</button>
+
+<button id="archive">Archive experiment</button>
+<!--
+    Add node first, then provide option to place it.
+    Also add possibility to capture coords on-site
+-->
+<script>
+    var latitude = {{.Latitude}}
+    var longitude = {{.Longitude}}
+    var map = L.map("mapview").setView([latitude, longitude], 16);
+	var tiles = L.tileLayer('https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', 
+		{
+				maxZoom: 25,
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+		});
+	map.addLayer(tiles)
+</script>
+
+{{template "footer"}}
+{{end}}

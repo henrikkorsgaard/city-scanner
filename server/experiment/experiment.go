@@ -85,6 +85,7 @@ func init() {
 	statement.Exec()
 
 	AllExperimentNames = getAllExperimentNames()
+	fmt.Println(AllExperimentNames)
 }
 
 func NewExperiment(jsonData []byte) (e Experiment, exists bool, err error) {
@@ -171,7 +172,7 @@ func NewExperiment(jsonData []byte) (e Experiment, exists bool, err error) {
 //Public so careful!
 func GetExperiment(name string) (e Experiment, err error) {
 	e = Experiment{}
-	statement := `SELECT name, slug, email, latitude, longitude FROM experiments WHERE name=$1;`
+	statement := `SELECT name, slug, email, latitude, longitude FROM experiments WHERE slug=$1;`
 
 	row := experimentDB.QueryRow(statement, name)
 	err = row.Scan(&e.Name, &e.Slug, &e.Email, &e.Latitude, &e.Longitude)

@@ -131,7 +131,21 @@ func experimentHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("404\n"))
 	} else {
-		w.Write([]byte("good\n"))
+		files = append(files, filepath.Join("./client/templates", "experiment.tmpl"))
+		tmpl, err := template.ParseFiles(files...)
+
+		if err != nil {
+			// Log the detailed error
+			log.Println(err.Error())
+			// Return a generic "Internal Server Error" message
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
+
+		if err := tmpl.ExecuteTemplate(w, "experiment", e); err != nil {
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(500), 500)
+		}
 	}
 
 }
