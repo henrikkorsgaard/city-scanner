@@ -34,6 +34,7 @@ func main() {
 	r.HandleFunc("/create", createHandler).Methods("GET", "POST")
 	r.HandleFunc("/validate/{key}/{value}", validateHandler).Methods("GET")
 	r.HandleFunc("/experiment/{experiment}", experimentHandler).Methods("GET")
+	r.HandleFunc("/experiment/{experiment}/configurationfile.config", experimentConfigurationFileHandler).Methods("GET")
 	r.HandleFunc("/api/", apiHandler).Methods("GET", "POST")
 
 	log.Fatal(http.ListenAndServe(":2488", r))
@@ -126,7 +127,7 @@ func experimentHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	slug := vars["experiment"]
 	e, err := experiment.GetExperiment(slug)
-	fmt.Println(e)
+
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("404\n"))
@@ -148,6 +149,23 @@ func experimentHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+func experimentConfigurationFileHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	slug := vars["experiment"]
+
+	e, err := experiment.GetExperiment(slug)
+
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("404\n"))
+	} else {
+		w.Header().Set("Content-Disposition", "attachment; filename=city-scanner.config")
+		w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
+
+		w.Write([]byte(e.GenerateConfigurationFile()))
+	}
 }
 
 func apiHandler(w http.ResponseWriter, r *http.Request) {

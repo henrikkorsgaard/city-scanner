@@ -1,31 +1,54 @@
 {{define "experiment"}}
 {{template "header"}}
 <link rel="stylesheet" type="text/css" href="/static/css/experiment.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+  integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
   crossorigin="" />
-<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+  integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
   crossorigin=""></script>
-<button id="back">&larr;</button>
+  <a href="/"><button id="home" type="button">Home</button></a>
+
 <h1 id="name">Experiment: {{.Name}}</h1>
 <div id="email">Primary contact: {{.Email}}</div>
-<div id="mapview"></div>
-<button id="download">Download configuration file</button>
-
 <button id="archive">Archive experiment</button>
-<!--
-    Add node first, then provide option to place it.
-    Also add possibility to capture coords on-site
--->
+<h2>Data collection</h2>
+<button>Start data collection</button><button disabled="true">Stop data collection</button>
+<div id=overview">
+</div>
+
+<h2>Sensing Nodes</h2>
+<p>To add sensing nodes you will need to download the configuration file and add it to the boot partition on the SD card for each raspberry PI node. When they become active and start reporting data they will show up here and you can emplace them on the map.</p>
+<a id="download" href="."><button type="button">Download configuration file</button></a>
+<div id="mapview"></div>
+<div id="nodes">
+</div>
+
+
 <script>
-    var latitude = {{.Latitude}}
-    var longitude = {{.Longitude}}
-    var map = L.map("mapview").setView([latitude, longitude], 16);
-	var tiles = L.tileLayer('https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', 
-		{
-				maxZoom: 25,
-				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-		});
-	map.addLayer(tiles)
+  var download = document.querySelector("#download")
+  var url = document.location
+  download.setAttribute("href", document.location + "/configurationfile.config" )
+
+  var archive = document.querySelector("#archive")
+  archive.addEventListener('click', function () {
+    var response = confirm("Warning: Archived experiments will remove the possibility for collecting data from sensing nodes. Existing data will still be available for analysis and download");
+    if (response == true) {
+      //set experiment status to archived
+      //that's it!
+    } 
+  });
+  var latitude = {{.Latitude }}
+  var longitude = {{.Longitude }}
+  var map = L.map("mapview").setView([latitude, longitude], 16);
+  var tiles = L.tileLayer('https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png',
+    {
+      maxZoom: 25,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+  map.addLayer(tiles)
+
+
 </script>
 
 {{template "footer"}}

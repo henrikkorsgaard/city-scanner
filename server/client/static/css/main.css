@@ -9,6 +9,7 @@ html, body {
 }
 
 #wrapper {
+  position:relative;
   margin:0px auto;
   min-width: 600px;
   width: 80%;
