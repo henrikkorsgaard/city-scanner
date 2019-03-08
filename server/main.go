@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/subtle"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -30,13 +31,13 @@ func main() {
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 
-	r.HandleFunc("/", overviewHandler).Methods("GET")
-	r.HandleFunc("/create", createHandler).Methods("GET", "POST")
+	r.HandleFunc("/", BasicAuth(overviewHandler)).Methods("GET")
+	r.HandleFunc("/create", BasicAuth(createHandler)).Methods("GET", "POST")
 	r.HandleFunc("/validate/{key}/{value}", validateHandler).Methods("GET")
-	r.HandleFunc("/experiment/{experiment}", experimentHandler).Methods("GET")
+	r.HandleFunc("/experiment/{experiment}", BasicAuth(experimentHandler)).Methods("GET")
 	r.HandleFunc("/experiment/{experiment}/configurationfile.config", experimentConfigurationFileHandler).Methods("GET")
 	r.HandleFunc("/api/", apiHandler).Methods("GET", "POST")
-
+	//r.HandleFunc("/favicon.ico", faviconHandler).Methods("GET")
 	log.Fatal(http.ListenAndServe(":2488", r))
 
 }
@@ -187,3 +188,26 @@ func setupResponse(w *http.ResponseWriter, req *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }
+
+func BasicAuth(handler http.HandlerFunc) http.HandlerFunc {
+	username := "aarhus"
+	password := "city"
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		user, pass, ok := r.BasicAuth()
+
+		if !ok || subtle.ConstantTimeCompare([]byte(user), []byte(username)) != 1 || subtle.ConstantTimeCompare([]byte(pass), []byte(password)) != 1 {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Please enter password"`)
+			w.WriteHeader(401)
+			w.Write([]byte("Unauthorised.\n"))
+			return
+		}
+
+		handler(w, r)
+	}
+}
+
+/*
+func faviconHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, path.Join(publicPath, "./images/favicon.ico"))
+}*/
