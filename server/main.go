@@ -46,7 +46,7 @@ func overviewHandler(w http.ResponseWriter, r *http.Request) {
 
 	files = append(files, filepath.Join("./client/templates", "overview.tmpl"))
 	tmpl, err := template.ParseFiles(files...)
-
+	experiments := experiment.GetAllExperiments()
 	if err != nil {
 		// Log the detailed error
 		log.Println(err.Error())
@@ -55,7 +55,7 @@ func overviewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := tmpl.ExecuteTemplate(w, "overview", nil); err != nil {
+	if err := tmpl.ExecuteTemplate(w, "overview", experiments); err != nil {
 		log.Println(err.Error())
 		http.Error(w, http.StatusText(500), 500)
 	}
@@ -69,13 +69,12 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal("Error reading the body", err)
 		}
 
-		experiment, exists, err := experiment.NewExperiment(jsonData)
+		experiment, _, err := experiment.NewExperiment(jsonData)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(exists)
-		//exists should be handled in valudation
-		fmt.Println(experiment)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("/experiment/" + experiment.Slug))
 
 	} else {
 		files = append(files, filepath.Join("./client/templates", "create.tmpl"))

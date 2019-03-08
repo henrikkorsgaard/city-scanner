@@ -180,13 +180,14 @@ function postData(data){
 	var xhr = new XMLHttpRequest();
 	
 	xhr.open('POST', './create');
-	/*
+	
 	xhr.onreadystatechange = function () {
 		if (xhr.readyState === 4 && xhr.status === 200) {
-			console.log("post success")
-			
+			document.location = xhr.responseText
+		} else {
+			console.log("HENRIK NEED TO FIX THIS")
 		}
-	}*/
+	}
 	console.log(JSON.stringify(data))
 	xhr.send(JSON.stringify(data));
 }

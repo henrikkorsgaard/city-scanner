@@ -1,10 +1,10 @@
 {{define "overview"}}
 {{template "header"}}
 <a href="create" class="list"><h2>Setup new experiment</h2></a>
-<div id="running" class="list"><h2>Running Experiments</h2>
-<div class="experiment"></div>
-<div class="experiment"></div>
-<div class="experiment"></div>
+<div id="active" class="list open"><h2>Active Experiments</h2>
+  {{range .}}
+  <div class="experiment"><a href="/experiment/{{.Slug}}"><h3>Experiment: {{.Name}}</h3></a></div>
+  {{end}}
 </div>
 <div id="archived" class="list"><h2>Archived Experiments</h2>
   <div class="experiment"></div>

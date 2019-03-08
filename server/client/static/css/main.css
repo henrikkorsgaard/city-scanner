@@ -36,7 +36,7 @@ html, body {
   margin:0px;
 } 
 
-#wrapper .list#running {
+#wrapper .list#active {
   background:#666688;
 }
 
@@ -54,5 +54,11 @@ html, body {
     margin:5px auto;
     height: 100px;
     width: 90%;
+    color: white;
     border:1px solid #eeeeff;
+}
+
+#wrapper .experiment a {
+  text-decoration: none;
+  color: white;
 }

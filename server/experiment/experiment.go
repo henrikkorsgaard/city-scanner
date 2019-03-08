@@ -201,6 +201,28 @@ func GetExperiment(slug string) (e Experiment, err error) {
 	return
 }
 
+func GetAllExperiments() (experiments []Experiment) {
+	statement := `SELECT name,slug FROM experiments;`
+	var name string
+	var slug string
+
+	rows, err := experimentDB.Query(statement)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&name, &slug)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		experiments = append(experiments, Experiment{Name: name, Slug: slug})
+	}
+
+	return experiments
+}
+
 //Public so careful!
 func (e *Experiment) GenerateConfigurationFile() (configs []byte) {
 	var iniString strings.Builder
