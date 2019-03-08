@@ -1,0 +1,27 @@
+[Unit]
+Description=City-scanner server
+ConditionPathExists=/root/go/src/github.com/henrikkorsgaard/city-scanner/server/city-scanner-server
+After=network.target
+ 
+[Service]
+Type=simple
+User=web
+Group=web
+LimitNOFILE=1024
+
+Restart=on-failure
+RestartSec=10
+StartLimitIntervalSec=60
+
+WorkingDirectory=/root/go/src/github.com/henrikkorsgaard/city-scanner/server
+ExecStart=/root/go/src/github.com/henrikkorsgaard/city-scanner/server/city-scanner-server
+
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/city-scanner
+ExecStartPre=/bin/chown syslog:adm /var/log/city-scanner
+ExecStartPre=/bin/chmod 755 /var/log/city-scanner
+StandardOutput=syslog
+SyslogIdentifier=city-scanner-server
+
+[Install]
+WantedBy=multi-user.target
