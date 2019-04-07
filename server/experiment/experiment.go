@@ -260,7 +260,7 @@ func (e *Experiment) GenerateConfigurationFile() (configs []byte) {
 
 	s := strings.Split(string(e.PublicKeyPEM), "\n")
 	for i, st := range s {
-		iniString.WriteString("Key" + strconv.Itoa(i) + "=" + st + linebreak)
+		iniString.WriteString("key" + strconv.Itoa(i) + "=" + st + linebreak)
 	}
 
 	configs = []byte(iniString.String())
