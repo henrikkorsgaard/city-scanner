@@ -13,22 +13,27 @@
 <div id="email">Primary contact: {{.Email}}</div>
 <button id="archive">Archive experiment</button>
 <h2>Data collection</h2>
-<button>Start data collection</button><button disabled="true">Stop data collection</button>
+<!--<button>Start data collection</button><button disabled="true">Stop data collection</button>-->
 <div id=overview">
 </div>
-
+<div id="mapview"></div>
+<button id="add-node">Add sensing node</button>
+<div id="nodes">
+</div>
+<!--
 <h2>Sensing Nodes</h2>
 <p>To add sensing nodes you will need to download the configuration file and add it to the boot partition on the SD card for each raspberry PI node. When they become active and start reporting data they will show up here and you can emplace them on the map.</p>
 <a id="download" href="."><button type="button">Download configuration file</button></a>
-<div id="mapview"></div>
-<div id="nodes">
-</div>
+-->
+
 
 
 <script>
-  var download = document.querySelector("#download")
+  // var download = document.querySelector("#download")
   var url = document.location
-  download.setAttribute("href", document.location + "/configurationfile.config" )
+  //download.setAttribute("href", document.location + "/configurationfile.config" )
+  var nodeIDs = [] //TODO need to persist this!
+  var name = "{{.Name}}"
 
   var archive = document.querySelector("#archive")
   archive.addEventListener('click', function () {
@@ -38,6 +43,16 @@
       //that's it!
     } 
   });
+
+  var add = document.querySelector("#add-node")
+  var nodes = document.querySelector("#nodes")
+  add.addEventListener("click", function(){
+      var el = document.createElement("div")
+      el.classList = "node"
+      el.innerHTML = `<input type="text" placeholder="name"><input type="text" disabled value="${nodeIDs.length+1}"><input type="text" placeholder="latitude"><input type="text" placeholder="longitude"><button class="map-select">Select on map</button><button class="delete">DELETE NODE</button>`;
+      nodes.appendChild(el)
+  })
+
   var latitude = {{.Latitude }}
   var longitude = {{.Longitude }}
   var map = L.map("mapview").setView([latitude, longitude], 16);
