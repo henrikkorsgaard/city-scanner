@@ -31,7 +31,7 @@ WE NEED TO MAKE THE PUBLIC KEY PART OF THE EXPERIMENT INITIALISATION
 type Experiment struct {
 	ID               int     //
 	Slug             string  //Slug used to show it on the platform + date
-	Name             string  `json:"name"`  //Name end-user identifier
+	Name             string  //Name end-user identifier
 	Email            string  `json:"email"` //Email to the primary researcher
 	Latitude         float64 `json:"lat"`   //Latitude coords to the map center of the experiment
 	Longitude        float64 `json:"lng"`
@@ -44,12 +44,11 @@ type Experiment struct {
 }
 
 type Node struct {
-	ID          int
-	Description string
-	Location    string
-	Latitude    float64
-	Longitude   float64
-	Readings    []Reading
+	ID        string  `json:"nodeid"`
+	Name      string  `json:"name"`
+	Latitude  float64 `json:"lat"`
+	Longitude float64 `json:"lng"`
+	Readings  []Reading
 }
 
 type Reading struct {
@@ -311,4 +310,9 @@ func RandStringBytes(n int) string {
 		b[i] = letterBytes[mrand.Intn(len(letterBytes))]
 	}
 	return string(b)
+}
+
+func (e *Experiment) GetNode(id int) (n Node, err error) {
+
+	return
 }

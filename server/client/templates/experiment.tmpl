@@ -7,18 +7,25 @@
 <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
   integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
   crossorigin=""></script>
-  <a href="/"><button id="home" type="button">Home</button></a>
+<a href="/"><button id="home" type="button">Home</button></a>
 
 <h1 id="name">Experiment: {{.Name}}</h1>
 <div id="email">Primary contact: {{.Email}}</div>
 <button id="archive">Archive experiment</button>
 <h2>Data collection</h2>
-<!--<button>Start data collection</button><button disabled="true">Stop data collection</button>-->
 <div id=overview">
 </div>
 <div id="mapview"></div>
 <button id="add-node">Add sensing node</button>
 <div id="nodes">
+  <div class="node" data-nodeid="">
+    <input type="text" class="name" placeholder="Unique node name"><br>
+    <input type="text" class="coordinate" placeholder="Latitude">
+    <input type="text" class="coordinate" placeholder="Longitude"><button class="map-select">Select on
+      map</button><br><br>
+    <button class="save">Save</button><button class="download">Download configuration file</button></button><button
+      class="delete">DELETE</button>
+  </div>
 </div>
 <!--
 <h2>Sensing Nodes</h2>
@@ -34,23 +41,38 @@
   //download.setAttribute("href", document.location + "/configurationfile.config" )
   var nodeIDs = [] //TODO need to persist this!
   var name = "{{.Name}}"
-
+  var experimentID = "{{.ID}}"
+  console.log(experimentID)
   var archive = document.querySelector("#archive")
   archive.addEventListener('click', function () {
     var response = confirm("Warning: Archived experiments will remove the possibility for collecting data from sensing nodes. Existing data will still be available for analysis and download");
     if (response == true) {
       //set experiment status to archived
       //that's it!
-    } 
+    }
   });
 
   var add = document.querySelector("#add-node")
   var nodes = document.querySelector("#nodes")
-  add.addEventListener("click", function(){
-      var el = document.createElement("div")
-      el.classList = "node"
-      el.innerHTML = `<input type="text" placeholder="name"><input type="text" disabled value="${nodeIDs.length+1}"><input type="text" placeholder="latitude"><input type="text" placeholder="longitude"><button class="map-select">Select on map</button><button class="delete">DELETE NODE</button>`;
-      nodes.appendChild(el)
+
+  nodes.addEventListener("click", function () {
+    //handle node clicks
+    //location
+    //save
+    //delete
+    //download
+
+  })
+
+  add.addEventListener("click", function () {
+    getNode()
+    //we need to get an idea and create it on the server!
+    /*
+    var el = document.createElement("div")
+    el.classList = "node"
+    el.innerHTML = `<input type="text" placeholder="name"><input type="text" disabled value="${nodeIDs.length + 1}"><input type="text" placeholder="latitude"><input type="text" placeholder="longitude"><button class="map-select">Select on map</button><button class="delete">DELETE NODE</button>`;
+    nodes.appendChild(el)
+    */
   })
 
   var latitude = {{.Latitude }}
@@ -63,6 +85,39 @@
     });
   map.addLayer(tiles)
 
+  function getNode() {
+    var xhr = new XMLHttpRequest();
+    
+    xhr.open('POST', window.location + '/node/-1');
+    console.log(xhr)
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        console.log(xhr.responseText)
+      } else {
+        console.log(xhr.status)
+        console.log("HENRIK NEED TO FIX THIS")
+      }
+    }
+    //console.log(JSON.stringify(data))
+    xhr.send();
+  }
+
+  function saveNode(id, data){
+    var xhr = new XMLHttpRequest();
+    
+    xhr.open('POST', window.location + '/node/'+id);
+    console.log(xhr)
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        console.log(xhr.responseText)
+      } else {
+        console.log(xhr.status)
+        console.log("HENRIK NEED TO FIX THIS")
+      }
+    }
+    //console.log(JSON.stringify(data))
+    xhr.send(JSON.stringify(data));
+  }
 
 </script>
 

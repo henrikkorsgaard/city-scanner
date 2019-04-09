@@ -11,7 +11,7 @@ html, body {
 #wrapper {
   position:relative;
   margin:0px auto;
-  min-width: 600px;
+  min-width: 800px;
   width: 80%;
   max-width: 1200px;
   height: 100%;

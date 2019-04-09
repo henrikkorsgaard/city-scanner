@@ -35,11 +35,53 @@ func main() {
 	r.HandleFunc("/create", BasicAuth(createHandler)).Methods("GET", "POST")
 	r.HandleFunc("/validate/{key}/{value}", validateHandler).Methods("GET")
 	r.HandleFunc("/experiment/{experiment}", BasicAuth(experimentHandler)).Methods("GET")
+	r.HandleFunc("/experiment/{experiment}/node/{id}", nodeHandler).Methods("GET", "POST")
 	r.HandleFunc("/experiment/{experiment}/configurationfile.config", experimentConfigurationFileHandler).Methods("GET")
 	r.HandleFunc("/api/", apiHandler).Methods("GET", "POST")
 	//r.HandleFunc("/favicon.ico", faviconHandler).Methods("GET")
 	log.Fatal(http.ListenAndServe(":2488", r))
 
+}
+
+func nodeHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	fmt.Println("akhdsa")
+	//slug := vars["experiment"]
+	//e, err := experiment.GetExperiment(slug)
+
+	//if post -> save node and return id
+	//if get return node
+	if r.Method == "POST" {
+		nid := vars["id"]
+		//jsonData, err := ioutil.ReadAll(r.Body)
+		/*
+			if err != nil {
+				log.Fatal("Error reading the body", err)
+			}*/
+		fmt.Println(nid)
+		/*
+			n, err := e.GetNode(nid)
+
+			fmt.Println(n, err)
+		*/
+		/*
+			jsonData, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				log.Fatal("Error reading the body", err)
+			}
+
+			node, _, err := node.NewExperiment(jsonData)
+			if err != nil {
+				log.Fatal(err)
+			}*/
+		/*
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("/experiment/" + experiment.Slug))
+		*/
+
+	} else {
+		//return node json
+	}
 }
 
 func overviewHandler(w http.ResponseWriter, r *http.Request) {
